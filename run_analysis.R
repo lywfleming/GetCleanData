@@ -1,57 +1,72 @@
+# This script works with the Human Activity Recognition Using Smartphones Dataset.
+# The mean() and std() for each variable (excluding 'meanFreq') were extracted 
+# from the "train" and "test" data sets and then combined. The mean for each variable
+# associated with each Subject ID and subsetted with the Activity IDs. Activity IDs are properly
+# are properly named prior to writing to file.
+
 # Read in train data
 
-trainsubjects_file <- "train/subject_train.txt"
-trainsubjects <- read.table(trainsubjects_file)
-#colnames(trainsubjects) <- ("Subject ID")
+   trainsubjects_file <- "train/subject_train.txt"  # contains subject IDs
+   trainsubjects <- read.table(trainsubjects_file)
 
-trainlabels_file<-"train/y_train.txt"
-trainlabels<-read.table(trainlabels_file)
+   trainlabels_file<-"train/y_train.txt"   # contains activity labels
+   trainlabels<-read.table(trainlabels_file)
 
-train_file<-"train/X_train.txt"
-train_data<-read.table(train_file)
+   train_file<-"train/X_train.txt"  # contains raw measurment data
+   train_data<-read.table(train_file)
 
 # Read in test data
 
-testsubjects_file <- "test/subject_test.txt"
-testsubjects <- read.table(testsubjects_file)
+   testsubjects_file <- "test/subject_test.txt"
+   testsubjects <- read.table(testsubjects_file)
 
 
-testlabels_file<-"test/y_test.txt"
-testlabels<-read.table(testlabels_file)
+   testlabels_file<-"test/y_test.txt"
+   testlabels<-read.table(testlabels_file)
 
-test_file<-"test/X_test.txt"
-test_data<-read.table(test_file)
+   test_file<-"test/X_test.txt"
+   test_data<-read.table(test_file)
 
-# Read in activity features and extract mean() and std() variables
+# Read in measurement features from "features.txt" and extract mean() and std()
+# variables (excluding meanFreq)
 
-variables<-read.table("features.txt")
+   variables<-read.table("features.txt")
 
-# Extract columns with mean() and std() data
+ # Extract columns with mean() and std() data
 
-colnames(train_data) <- variables[,2]
-colnames(test_data) <- variables[,2]
+  # Second column of 'variables' contains variable names from file
+     colnames(train_data) <- variables[,2]
+     colnames(test_data) <- variables[,2]
+  
+  # Find out which variables are the 'mean()' and 'std()'
+     vars_mean<-grepl("mean()", variables[,2], fixed = TRUE)
+     vars_std<-grepl("std()", variables[,2], fixed = TRUE)
+     vars_mean_std <- vars_mean | vars_std
+     
+  # Subset the raw data set with just the 'mean()' and 'std()' data   
+     train_data_mean_std <- train_data[,vars_mean_std]
+     colnames(train_data_mean_std) <- variables[vars_mean_std,2]
 
-vars_mean<-grepl("mean()", variables[,2], fixed = TRUE)
-vars_std<-grepl("std()", variables[,2], fixed = TRUE)
-vars_mean_std <- vars_mean | vars_std
+     test_data_mean_std <- test_data[,vars_mean_std]
 
-train_data_mean_std <- train_data[,vars_mean_std]
-colnames(train_data_mean_std) <- variables[vars_mean_std,2]
+# Finally bind Subject, Activity, and remaining data columns for both the 'train'
+# and 'test' data. Then, row bind the 'train' and 'test' data frames to make a
+# complete data set.
 
-test_data_mean_std <- test_data[,vars_mean_std]
+  all_train_data <- cbind(trainsubjects, trainlabels, train_data_mean_std)
 
-all_train_data <- cbind(trainsubjects, trainlabels, train_data_mean_std)
+  all_test_data <- cbind(testsubjects, testlabels, test_data_mean_std)
 
-all_test_data <- cbind(testsubjects, testlabels, test_data_mean_std)
+  data<- rbind( all_train_data, all_test_data)
 
-data<- rbind( all_train_data, all_test_data)
+  colnames(data)[1:2] <- c("SubjectID", "Activity")
 
-colnames(data)[1:2] <- c("SubjectID", "Activity")
+# Order data by Subject ID and Activity ID.
 
-#Split groups by Subject ID and then by Activity. Take average of all 
-#variables.
+  order_data <- data[order(data$SubjectID, data$Activity),]
 
-order_data <- data[order(data$SubjectID, data$Activity),]
+# Group data first by Subject ID and then subset with Activity ID. Calculate the
+# mean for each measurement variable.
 
 final_data <- order_data %>% group_by(SubjectID, Activity) %>% summarize_each(funs(mean))
 
