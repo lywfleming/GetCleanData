@@ -44,7 +44,7 @@ activityrecognition '@' smartlab.ws
 
 ##Creating the tidy data file
 ###Guide to create the tidy data file
-This script works with the Human Activity Recognition Using Smartphones Dataset.
+The run_analysis.R script works with the Human Activity Recognition Using Smartphones Dataset.
 The mean() and std() for each variable (excluding 'meanFreq') were extracted 
 from the "train" and "test" data sets and then combined. The mean for each variable
 associated with each Subject ID and subsetted with the Activity IDs. Activity IDs are properly
