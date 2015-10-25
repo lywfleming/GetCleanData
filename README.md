@@ -15,6 +15,7 @@ Refer to the Readme.txt file in this repos that describes how the raw data was c
 In this repos:
 
 - run_analysis.R - contains the R script that manipulates the raw data
+- tidy_data.txt - final output file containing cleaned up data (180 rows x 68 columns).
 - CodeBook.md - description of the raw data and their files. Describes in detail the steps to the data manipulation.
 - Data files from above mentioned archive:
   - 'README.txt'
